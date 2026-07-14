@@ -73,8 +73,7 @@ function buildDist(options) {
       _currBuild = null;
     })
     .catch((err) => {
-      process.stderr.write(err);
-      process.stdout.write('\n');
+      console.error(err);
       _currBuild = null;
       process.exit(1);
     });
@@ -329,6 +328,14 @@ function generateFields(dataDir, tstrings, searchableFieldIDs, references) {
       delete field.stringsCrossReference;
     }
 
+    if (field.locationSet) {
+      if (!field.locationSet.include) {
+        field.locationSet.include = [
+            'Planet'
+        ];
+      }
+    }
+
     fields[id] = field;
   });
 
@@ -420,6 +427,14 @@ function generatePresets(dataDir, tstrings, searchableFieldIDs, listReusedIcons,
       references.presets[id] ||= {};
       references.presets[id].relation = preset.relationCrossReference;
       delete preset.relationCrossReference;
+    }
+
+    if (preset.locationSet) {
+      if (!preset.locationSet.include) {
+        preset.locationSet.include = [
+            'Planet'
+        ];
+      }
     }
   });
 
@@ -598,7 +613,6 @@ function generateTaginfo(presets, fields, deprecated, discarded, tstrings, proje
 
   Object.keys(presets).forEach(id => {
     let preset = presets[id];
-    if (preset.suggestion) return;
     if (id.startsWith('@')) return;
 
     /** @type {Record<string, Set<string>>} */
@@ -764,7 +778,7 @@ function generateTaginfo(presets, fields, deprecated, discarded, tstrings, proje
     if (['multiCombo', 'manyCombo', 'check', 'defaultCheck', 'onewayCheck'].includes(field.type)) {
       return false;
     }
-    if (field.autoSuggestion === false && field.customValues === false) {
+    if (field.autoSuggestions === false && field.customValues === false) {
       return false;
     }
     return true;
